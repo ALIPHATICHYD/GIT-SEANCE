@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git-seance"
+version = "0.1.0"
+description = "Summon the ghosts in your git history with a local open-weight model."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = []
+keywords = ["git", "blame", "gemma", "ollama", "halloween", "llm"]
+classifiers = [
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+
+[project.scripts]
+seance = "seance.cli:main"
+
+[tool.setuptools]
+packages = ["seance"]
