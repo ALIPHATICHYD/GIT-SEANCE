@@ -120,7 +120,11 @@ Every commit that has touched this line, including its past lives (times it was 
 Your voice (your other commit messages):
 {voice}
 """
-    rules = SUMMON_RULES + ("\n" + SUMMONER_TWIST if h.is_summoner else "")
+    if h.is_summoner:
+        naming = "Never say your own name or invent one. Refer to yourself only as \"I\"."
+    else:
+        naming = f"Your name is {b.author}. If you introduce yourself, say exactly: \"I am {b.author}.\""
+    rules = SUMMON_RULES + "\n" + naming + ("\n" + SUMMONER_TWIST if h.is_summoner else "")
     return [
         {"role": "system", "content": rules},
         {"role": "user", "content": evidence + f"\nThe summoner asks: {question}"},

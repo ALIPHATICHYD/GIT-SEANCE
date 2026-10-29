@@ -42,6 +42,7 @@ class HauntedRepo(unittest.TestCase):
         self.assertTrue(h.is_summoner)
         system = spirit.summon_messages(h, "why 37?")[0]["content"]
         self.assertIn("IS you", system)
+        self.assertIn("Never say your own name", system)
 
     def test_prompt_carries_evidence(self):
         h = spirit.gather("lantern/printer.py", 9, cwd=self.repo)
