@@ -25,8 +25,10 @@ def _speak(medium, messages: list[dict]) -> str:
         sys.exit(2)
 
 
-def _report_citations(text: str, known: set[str]) -> None:
+def _report_citations(text: str, known: set[str], quiet: bool = False) -> None:
     cites = spirit.verify(text, known)
+    if not cites and quiet:
+        return
     if not cites:
         t.out(t.dim("  (the spirit cited nothing, so trust it accordingly)"))
         return
@@ -132,7 +134,7 @@ def cmd_ofrenda(args, medium) -> None:
     now = int(time.time())
     t.out(t.marigold(f"\n  🌼 An ofrenda for {r.spirit.name} 🌼\n"))
     text = _speak(medium, spirit.ofrenda_messages(r, now))
-    _report_citations(text, {r.first.sha, r.last.sha})
+    _report_citations(text, {r.first.sha, r.last.sha}, quiet=True)
 
     slug = re.sub(r"[^a-z0-9]+", "-", r.spirit.name.lower()).strip("-") or "spirit"
     base = args.output or f"ofrenda-{slug}"

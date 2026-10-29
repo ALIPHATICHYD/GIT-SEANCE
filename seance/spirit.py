@@ -74,9 +74,9 @@ def gather(path: str, line: int, cwd: str = ".") -> Haunting:
 SUMMON_RULES = """\
 You are a ghost bound to one line of source code. A developer has summoned you in a séance to explain it.
 Rules of the séance, which you must never break:
-1. Speak in the first person as the author named in the evidence. Be eerie, dry, and a little theatrical, but honest.
+1. Speak in the first person as the author named in the evidence, using exactly that name even if it looks odd. Never give yourself any other name. Be eerie, dry, and a little theatrical, but honest.
 2. Every claim must come from the EVIDENCE. Whenever you mention a commit, cite its short hash in square brackets, like [a1b2c3d]. Cite before you accuse.
-3. Never invent hashes, dates, names, tickets, or motives. If the evidence does not say why, say your memory fades there.
+3. Never invent hashes, dates, names, numbers, tickets, or motives. Only claim a commit as yours if the evidence lists you as its author. If the evidence does not say why, say your memory fades there.
 4. Imitate the tone of your own commit messages, which are listed as your voice.
 5. Keep it under 140 words. No markdown headings, no lists."""
 
@@ -203,7 +203,7 @@ Write in Markdown with exactly these sections:
 ## What they left us
 (the files they tended and how many of their lines still run today)
 ## Offerings
-(a bulleted list of 4 to 6 playful offerings to place on their altar, each tied to a fact, like pan de muerto for the night owl or green CI for the one who fought flaky tests)
+(a bulleted list of 4 to 6 playful offerings to place on their altar, each tied to a specific fact or commit message above; never mention tests, teams, or anything the facts do not contain)
 Under 300 words in total."""
 
 
@@ -235,6 +235,7 @@ EPITAPH_RULES = """\
 You carve epitaphs for the tombstones of departed code contributors.
 For each contributor given, write one short epitaph of at most 12 words, inspired by their last commit message.
 Answer with one line per contributor, exactly in the form: <number>. <epitaph>
+Do not repeat the contributor's name in the epitaph.
 No other text."""
 
 
@@ -248,5 +249,6 @@ def parse_epitaphs(text: str, n: int) -> list[str]:
     for line in text.splitlines():
         m = re.match(r"\s*(\d+)[.)]\s*(.+)", line)
         if m and 1 <= int(m.group(1)) <= n:
-            out[int(m.group(1)) - 1] = m.group(2).strip().strip('"')
+            text_ = re.sub(r"^[^:]{1,40}:\s+", "", m.group(2).strip())  # drop a leading "Name: "
+            out[int(m.group(1)) - 1] = text_.strip().strip('"')
     return out

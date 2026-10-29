@@ -81,6 +81,7 @@ class HauntedRepo(unittest.TestCase):
     def test_epitaph_parsing(self):
         self.assertEqual(spirit.parse_epitaphs("1. Kept the light on.\n2) \"Never again\"\nnoise", 3),
                          ["Kept the light on.", "Never again", ""])
+        self.assertEqual(spirit.parse_epitaphs("1. Edna Voss: May her code shine.", 1), ["May her code shine."])
 
     def test_scripted_summon_end_to_end(self):
         h = spirit.gather("lantern/printer.py", 9, cwd=self.repo)
