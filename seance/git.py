@@ -40,6 +40,19 @@ def commit_exists(sha: str, cwd: str = ".") -> bool:
     return proc.returncode == 0
 
 
+def web_remote(cwd: str = ".") -> str:
+    """The origin remote as an https URL (GitHub, GitLab, Codeberg), or "" if there is none."""
+    url = run(["config", "--get", "remote.origin.url"], cwd, check=False).strip()
+    if url.startswith("git@"):
+        host, _, path = url[4:].partition(":")
+        url = f"https://{host}/{path}"
+    elif url.startswith("ssh://"):
+        url = "https://" + url.split("@", 1)[-1].replace(":", "/", 1) if "@" in url else ""
+    if not url.startswith("http"):
+        return ""
+    return url[:-4] if url.endswith(".git") else url.rstrip("/")
+
+
 def short(sha: str) -> str:
     return sha[:7]
 

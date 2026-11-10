@@ -36,6 +36,52 @@ class Haunting:
     is_summoner: bool
     departed_days: int
     known_shas: set[str] = field(default_factory=set)
+    letters: list["Letter"] = field(default_factory=list)
+
+
+# ---------------------------------------------------------------- letters from the other side
+
+@dataclass
+class Letter:
+    """A page a commit points to (a PR, an issue, a link), read through the gateway."""
+
+    url: str
+    commit: str
+    title: str = ""
+    text: str = ""
+
+
+_URL = re.compile(r"https?://[^\s<>()\[\]\"']+")
+_REF = re.compile(r"(?:^|[\s(])(?:PR\s*|pull request\s*|issue\s*|fixes\s*|closes\s*)?#(\d{1,6})\b", re.I)
+
+
+def find_letters(h: "Haunting", web: str, limit: int = 3) -> list[Letter]:
+    """URLs and #123 references in the line's commits, newest commit first, without repeats."""
+    seen: dict[str, Letter] = {}
+    for c in [h.commit, *h.history]:
+        for u in _URL.findall(c.message):
+            u = u.rstrip(".,;:")
+            seen.setdefault(u, Letter(u, c.sha))
+        if web:
+            for n in _REF.findall(c.message):
+                u = f"{web}/issues/{n}" if "github.com" in web else f"{web}/-/issues/{n}"
+                seen.setdefault(u, Letter(u, c.sha))
+    return list(seen.values())[:limit]
+
+
+def read_letters(letters: list[Letter], fetch) -> list[Letter]:
+    """Fill each letter through `fetch(url) -> {title, text}`. Unreadable letters are dropped."""
+    read = []
+    for le in letters:
+        try:
+            page = fetch(le.url)
+        except Exception:  # noqa: BLE001 - a lost letter must not end the séance
+            continue
+        le.title = (page.get("title") or "").strip()
+        le.text = (page.get("text") or "").strip()
+        if le.text:
+            read.append(le)
+    return read
 
 
 def gather(path: str, line: int, cwd: str = ".") -> Haunting:
@@ -97,6 +143,11 @@ def summon_messages(h: Haunting, question: str) -> list[dict]:
             if h.departed_days >= 365 else f"{h.departed_days} days")
     status = (f"You have not committed to this repository for {gone}. You are, in every sense that matters here, dead."
               if h.departed_days > 90 else "You still walk among the living contributors.")
+    letters = ""
+    if h.letters:
+        letters = "\nLetters from the other side: pages your commits point to, read just now. Cite one as [letter N].\n" + "\n".join(
+            f"[letter {i}] {le.url} (named in [{git.short(le.commit)}]) {le.title}\n{le.text[:1500]}"
+            for i, le in enumerate(h.letters, 1))
     evidence = f"""EVIDENCE
 File: {h.path}, line {h.line}
 The haunted line:
@@ -119,7 +170,7 @@ Every commit that has touched this line, including its past lives (times it was 
 
 Your voice (your other commit messages):
 {voice}
-"""
+{letters}"""
     if h.is_summoner:
         naming = "Never say your own name or invent one. Refer to yourself only as \"I\"."
     else:

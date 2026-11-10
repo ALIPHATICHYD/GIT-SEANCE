@@ -46,7 +46,8 @@ HISTORY = [
     ]),
     (EDNA, "2019-11-02T02:13:00",
      "wait for the printer to wake up\n\nIt is always cold in the basement after midnight and the printer\n"
-     "swallows the first bytes it hears. 300ms is enough. 200ms is not.\nI tried. Do not remove.",
+     "swallows the first bytes it hears. 300ms is enough. 200ms is not.\nI tried. Do not remove.\n\n"
+     "ESC @ resets the printer, see https://en.wikipedia.org/wiki/ESC/P",
      [("lantern/printer.py", "    port.write(b\"\\x1b@\")\n", "    port.write(b\"\\x1b@\")\n    time.sleep(0.3)  # do not remove\n")]),
     (EDNA, "2020-03-13T01:02:00", "add till totals. counting coins by candlelight", [
         ("lantern/till.py", None, "def total(items):\n    return round(sum(price for _, price in items), 2)\n"),
