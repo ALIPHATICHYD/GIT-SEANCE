@@ -156,12 +156,15 @@ class OtariSwitchboard(unittest.TestCase):
         self.assertEqual(found[0].url, "https://en.wikipedia.org/wiki/ESC/P")
         h.letters = spirit.read_letters(found, self.client.fetch)
         self.assertEqual(h.letters[0].title, "ESC/P")
+        blank = spirit.read_letters([spirit.Letter("https://en.wikipedia.org/wiki/ESC/P", "x")], lambda u: {"text": "t"})
+        self.assertEqual(blank[0].title, "ESC/P")
         user = spirit.summon_messages(h, "why?")[1]["content"]
         self.assertIn("[letter 1]", user)
         self.assertIn("ESC @ initializes the printer.", user)
         system = spirit.summon_messages(h, "why?")[0]["content"]
         self.assertIn("cite it as [letter N]", system)
         self.assertEqual(spirit.cited_letters("as [letter 1] says, and [letter 9]", 1), [1])
+        self.assertEqual(spirit.cited_letters("bytes [letter\u202f1].", 1), [1])
 
     def test_issue_refs_become_urls(self):
         h = spirit.gather("lantern/printer.py", 9, cwd=self.repo)

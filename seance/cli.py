@@ -225,7 +225,9 @@ def cmd_tribunal(args, medium) -> None:
             continue
         excerpt = " ".join(x.text.split())
         t.out(t.ghost(f"     “{excerpt[:260]}{'…' if len(excerpt) > 260 else ''}”"))
-        t.out(t.dim(f"     sealed {x.sealed} · unseen {x.unseen} · lies {x.lies}"))
+        letters = spirit.cited_letters(x.text, len(h.letters))
+        t.out(t.dim(f"     sealed {x.sealed} · unseen {x.unseen} · lies {x.lies}"
+                    + (f" · cited {', '.join(f'[letter {n}]' for n in letters)}" if letters else "")))
         if x.receipt:
             t.out(t.dim(f"     ☎ {x.receipt.line()} · whole answer in {x.seconds:.1f}s"))
 

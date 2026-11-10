@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import urllib.parse
 import time
 from collections import Counter
 from dataclasses import dataclass, field
@@ -80,7 +81,9 @@ def read_letters(letters: list[Letter], fetch) -> list[Letter]:
         except Exception as e:  # noqa: BLE001 - a lost letter must not end the séance
             le.error = str(e) or type(e).__name__
             continue
-        le.title = (page.get("title") or "").strip() or le.url.rstrip("/").rsplit("/", 1)[-1].replace("_", " ")
+        path = urllib.parse.unquote(urllib.parse.urlparse(le.url).path).strip("/")
+        path = path[5:] if path.startswith("wiki/") else path
+        le.title = (page.get("title") or "").strip() or path.replace("_", " ")
         le.text = (page.get("text") or "").strip()
         if le.text:
             read.append(le)
@@ -204,7 +207,7 @@ class Citation:
 
 def cited_letters(text: str, n: int) -> list[int]:
     """Which [letter N] the ghost actually cited, among the n it was given."""
-    return sorted({int(x) for x in re.findall(r"\[letter (\d+)\]", text, re.I) if 1 <= int(x) <= n})
+    return sorted({int(x) for x in re.findall(r"\[\s*letter\s*(\d+)\s*\]", text, re.I) if 1 <= int(x) <= n})
 
 
 def verify(text: str, known: set[str], cwd: str = ".") -> list[Citation]:
