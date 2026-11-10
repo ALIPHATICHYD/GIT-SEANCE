@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-seance"
-version = "0.1.0"
-description = "Summon the ghosts in your git history with a local open-weight model."
+version = "0.2.0"
+description = "Summon the ghosts in your git history with open-weight models, locally or through Otari."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 dependencies = []
-keywords = ["git", "blame", "gemma", "ollama", "halloween", "llm"]
+keywords = ["git", "blame", "gemma", "ollama", "otari", "open-weight", "llm"]
 classifiers = [
   "Environment :: Console",
   "License :: OSI Approved :: MIT License",
