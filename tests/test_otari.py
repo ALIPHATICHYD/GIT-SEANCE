@@ -159,6 +159,9 @@ class OtariSwitchboard(unittest.TestCase):
         user = spirit.summon_messages(h, "why?")[1]["content"]
         self.assertIn("[letter 1]", user)
         self.assertIn("ESC @ initializes the printer.", user)
+        system = spirit.summon_messages(h, "why?")[0]["content"]
+        self.assertIn("cite it as [letter N]", system)
+        self.assertEqual(spirit.cited_letters("as [letter 1] says, and [letter 9]", 1), [1])
 
     def test_issue_refs_become_urls(self):
         h = spirit.gather("lantern/printer.py", 9, cwd=self.repo)

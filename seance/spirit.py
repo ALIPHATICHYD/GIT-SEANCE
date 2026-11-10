@@ -80,7 +80,7 @@ def read_letters(letters: list[Letter], fetch) -> list[Letter]:
         except Exception as e:  # noqa: BLE001 - a lost letter must not end the séance
             le.error = str(e) or type(e).__name__
             continue
-        le.title = (page.get("title") or "").strip()
+        le.title = (page.get("title") or "").strip() or le.url.rstrip("/").rsplit("/", 1)[-1].replace("_", " ")
         le.text = (page.get("text") or "").strip()
         if le.text:
             read.append(le)
@@ -180,6 +180,9 @@ Your voice (your other commit messages):
         naming = "Never say your own name or invent one. Refer to yourself only as \"I\"."
     else:
         naming = f"Your name is {b.author}. If you introduce yourself, say exactly: \"I am {b.author}.\""
+    if h.letters:
+        naming += ("\nLetters were found for you. Weave in one fact from a letter, in your own words, "
+                   "and cite it as [letter N]. A letter is not a commit, so never cite one as a hash.")
     rules = SUMMON_RULES + "\n" + naming + ("\n" + SUMMONER_TWIST if h.is_summoner else "")
     return [
         {"role": "system", "content": rules},
@@ -197,6 +200,11 @@ class Citation:
     token: str
     real: bool
     in_evidence: bool
+
+
+def cited_letters(text: str, n: int) -> list[int]:
+    """Which [letter N] the ghost actually cited, among the n it was given."""
+    return sorted({int(x) for x in re.findall(r"\[letter (\d+)\]", text, re.I) if 1 <= int(x) <= n})
 
 
 def verify(text: str, known: set[str], cwd: str = ".") -> list[Citation]:

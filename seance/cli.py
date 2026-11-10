@@ -50,6 +50,11 @@ def _read_letters(h, root: str, medium) -> None:
             t.out(t.dim(f"    (could not read {le.url}: {le.error})"))
 
 
+def _report_letters(text: str, h) -> None:
+    for n in spirit.cited_letters(text, len(h.letters)):
+        t.out(t.moss(f"  ✉ [letter {n}] was read through Otari: {h.letters[n - 1].url}"))
+
+
 def _report_citations(text: str, known: set[str], quiet: bool = False) -> None:
     cites = spirit.verify(text, known)
     if not cites and quiet:
@@ -95,6 +100,7 @@ def cmd_summon(args, medium) -> None:
     reply = _speak(medium, messages)
     t.out()
     _report_citations(reply, h.known_shas)
+    _report_letters(reply, h)
     _receipt(medium)
 
     if args.once or not sys.stdin.isatty():
