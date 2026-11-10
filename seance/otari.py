@@ -107,6 +107,8 @@ class Otari:
             hint = {401: " Check OTARI_API_KEY.", 421: " Your key belongs to the other region: set OTARI_BASE_URL.",
                     402: " The balance or pricing refused it.", 403: " A budget or policy refused it.",
                     424: " No provider serves that model for your key. Try: seance mediums"}.get(e.code, "")
+            if code == "web_access_disabled":
+                hint = " Turn on web access for your workspace under Tools in the Otari dashboard."
             raise OtariError(f"Otari answered {e.code}{' ' + code if code else ''}: {str(msg)[:240]}.{hint}") from e
         except urllib.error.URLError as e:
             raise OtariError(f"no answer from {self.base} ({e.reason})") from e
