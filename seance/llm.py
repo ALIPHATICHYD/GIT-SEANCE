@@ -1,6 +1,7 @@
-"""The medium: talks to an open-weight model running on your own machine.
+"""The medium: talks to an open-weight model, on your machine or through Otari.
 
-Two dialects are supported, both local by default:
+Three dialects are supported:
+  * Otari (`--backend otari`), Mozilla AI's open-source gateway: one key, many open-weight models
   * Ollama's native /api/chat (the default, e.g. `ollama pull gemma3:4b`)
   * any OpenAI-compatible server (llama.cpp's llama-server, LM Studio, vLLM)
 
@@ -23,6 +24,34 @@ DEFAULT_HOST = os.environ.get("SEANCE_HOST", "")
 
 class MediumError(RuntimeError):
     pass
+
+
+class OtariMedium:
+    """A medium that channels through an Otari gateway and keeps the receipt of each séance."""
+
+    backend = "otari"
+
+    def __init__(self, model: str = "", temperature: float = 0.8, ritual: str = "summon", client=None):
+        from .otari import DEFAULT_OTARI_MODEL, Otari
+        self.client = client or Otari()
+        self.model = model or DEFAULT_OTARI_MODEL
+        self.temperature = temperature
+        self.ritual = ritual
+        self.receipts: list = []
+
+    @property
+    def last(self):
+        return self.receipts[-1] if self.receipts else None
+
+    def channel(self, messages: list[dict]) -> Iterator[str]:
+        from .otari import OtariError, Receipt
+        r = Receipt(model=self.model)
+        self.receipts.append(r)
+        try:
+            yield from self.client.chat(self.model, messages, r, temperature=self.temperature,
+                                        tags={"app": "git-seance", "ritual": self.ritual})
+        except OtariError as e:
+            raise MediumError(str(e)) from e
 
 
 class Medium:
