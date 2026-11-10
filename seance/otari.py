@@ -51,7 +51,7 @@ class Receipt:
         if self.fallback or self.attempts > 1:
             bits.append(f"after {self.attempts} attempts (fallback fired)")
         if self.duration_ms is not None:
-            bits.append(f"{self.duration_ms / 1000:.1f}s")
+            bits.append(f"first byte in {self.duration_ms / 1000:.1f}s")
         if self.completion_tokens is not None:
             bits.append(f"{(self.prompt_tokens or 0) + self.completion_tokens} tokens")
         if self.cost_usd is not None:

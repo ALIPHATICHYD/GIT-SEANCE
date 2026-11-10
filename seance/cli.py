@@ -45,8 +45,9 @@ def _read_letters(h, root: str, medium) -> None:
     h.letters = spirit.read_letters(found, lambda u: client.fetch(u))
     for i, le in enumerate(h.letters, 1):
         t.out(t.dim(f"    [letter {i}] {le.url}  {le.title[:60]}"))
-    if len(h.letters) < len(found):
-        t.out(t.dim(f"    ({len(found) - len(h.letters)} could not be read)"))
+    for le in found:
+        if le.error:
+            t.out(t.dim(f"    (could not read {le.url}: {le.error})"))
 
 
 def _report_citations(text: str, known: set[str], quiet: bool = False) -> None:
@@ -220,7 +221,7 @@ def cmd_tribunal(args, medium) -> None:
         t.out(t.ghost(f"     “{excerpt[:260]}{'…' if len(excerpt) > 260 else ''}”"))
         t.out(t.dim(f"     sealed {x.sealed} · unseen {x.unseen} · lies {x.lies}"))
         if x.receipt:
-            t.out(t.dim(f"     ☎ {x.receipt.line()}"))
+            t.out(t.dim(f"     ☎ {x.receipt.line()} · whole answer in {x.seconds:.1f}s"))
 
     winner = next((x for x in heard if not x.error and not x.lies and x.citations), None)
     t.out()
@@ -246,10 +247,13 @@ def cmd_mediums(args, medium) -> None:
         t.out(t.blood(f"  {e}"))
         sys.exit(2)
     t.out()
+    models = sorted(models, key=lambda m: (m.get("in") is None, m.get("in") or 0, m["id"]))
     for m in models[: args.limit]:
         price = f"${m['in']:.2f} / ${m['out']:.2f} per M tokens" if m.get("in") is not None and m.get("out") is not None else ""
         t.out(f"  {t.marigold(m['id']):<50} {t.dim(price)}")
-    t.out(t.dim(f"\n  {len(models)} open-weight medium(s) awake. A tribunal would call: {', '.join(pick_panel(models)) or 'nobody'}"))
+    if len(models) > args.limit:
+        t.out(t.dim(f"  ... and {len(models) - args.limit} more (--limit {len(models)} to see them all)"))
+    t.out(t.dim(f"\n  {len(models)} open-weight medium(s) awake, cheapest first. A tribunal would call: {', '.join(pick_panel(models)) or 'nobody'}"))
     try:
         b = client.budget()
         left = b.get("remaining_usd")

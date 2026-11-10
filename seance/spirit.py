@@ -49,6 +49,7 @@ class Letter:
     commit: str
     title: str = ""
     text: str = ""
+    error: str = ""
 
 
 _URL = re.compile(r"https?://[^\s<>()\[\]\"']+")
@@ -70,17 +71,21 @@ def find_letters(h: "Haunting", web: str, limit: int = 3) -> list[Letter]:
 
 
 def read_letters(letters: list[Letter], fetch) -> list[Letter]:
-    """Fill each letter through `fetch(url) -> {title, text}`. Unreadable letters are dropped."""
+    """Fill each letter through `fetch(url) -> {title, text}`. Returns the readable ones;
+    an unreadable letter keeps its reason in `error`."""
     read = []
     for le in letters:
         try:
             page = fetch(le.url)
-        except Exception:  # noqa: BLE001 - a lost letter must not end the séance
+        except Exception as e:  # noqa: BLE001 - a lost letter must not end the séance
+            le.error = str(e) or type(e).__name__
             continue
         le.title = (page.get("title") or "").strip()
         le.text = (page.get("text") or "").strip()
         if le.text:
             read.append(le)
+        else:
+            le.error = "the page was empty"
     return read
 
 

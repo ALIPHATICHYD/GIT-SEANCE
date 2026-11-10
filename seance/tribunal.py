@@ -113,7 +113,7 @@ def report(h: spirit.Haunting, question: str, heard: list[Testimony]) -> str:
         "",
         f"Every medium got the same evidence through one [Otari](https://otari.ai) key. Git checked every hash.",
         "",
-        "| # | Asked | Served by | Verdict | Sealed | Unseen | Lies | Cost | Time |",
+        "| # | Asked | Served by | Verdict | Sealed | Unseen | Lies | Cost | Whole answer |",
         "|---|---|---|---|---|---|---|---|---|",
         *rows,
         "",
