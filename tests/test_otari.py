@@ -191,6 +191,7 @@ class OtariSwitchboard(unittest.TestCase):
     def test_catalog_panel_is_open_weight_and_diverse(self):
         models = self.client.open_weight_models()
         self.assertNotIn("openai/gpt-5", [m["id"] for m in models])
+        self.assertEqual(models[0]["id"], "openai/gpt-oss-120b")  # priced first, then unpriced by id
         self.assertEqual(pick_panel(models), ["google/gemma-3-27b-it", "qwen/qwen3-32b", "openai/gpt-oss-120b"])
 
     def test_cli_tribunal_end_to_end(self):

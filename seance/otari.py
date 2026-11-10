@@ -181,6 +181,10 @@ class Otari:
 
     def open_weight_models(self) -> list[dict]:
         """Open-weight chat models this key can reach, cheapest first."""
+        # The catalog's own price sort does not match ours, and mediums and tribunal must agree on the panel.
+        return sorted(self._open_weight_models(), key=lambda m: (m.get("in") is None, m.get("in") or 0, m["id"]))
+
+    def _open_weight_models(self) -> list[dict]:
         try:
             d = self._json("GET", "/catalog/models?type=chat&limit=200&sort=price&direction=asc")
             models = [m for m in d.get("models", []) if m.get("open_weights")]

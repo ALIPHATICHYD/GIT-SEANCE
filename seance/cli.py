@@ -255,7 +255,6 @@ def cmd_mediums(args, medium) -> None:
         t.out(t.blood(f"  {e}"))
         sys.exit(2)
     t.out()
-    models = sorted(models, key=lambda m: (m.get("in") is None, m.get("in") or 0, m["id"]))
     for m in models[: args.limit]:
         price = f"${m['in']:.2f} / ${m['out']:.2f} per M tokens" if m.get("in") is not None and m.get("out") is not None else ""
         t.out(f"  {t.marigold(m['id']):<50} {t.dim(price)}")
